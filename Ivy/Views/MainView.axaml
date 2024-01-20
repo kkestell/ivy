@@ -1,0 +1,365 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ivy.ViewModels"
+             xmlns:common="clr-namespace:Ivy.Common;assembly=Ivy.Common"
+             x:Class="Ivy.Views.MainView"
+             x:DataType="vm:MainViewModel"
+             d:DesignWidth="1200"
+             d:DesignHeight="600"
+             Name="RootView">
+
+    <Grid RowDefinitions="Auto,*"
+          ColumnDefinitions="*">
+
+        <Menu Grid.Row="0">
+
+            <MenuItem Name="LibraryMenuItem"
+                      Header="_Library">
+
+                <MenuItem Header="_New Library..."
+                          Command="{Binding NewLibraryCommand}" />
+
+                <MenuItem x:Name="LibrariesMenuItem"
+                          Header="_Select Library"
+                          IsEnabled="False" />
+
+                <Separator />
+
+                <MenuItem Header="_Import Book..."
+                          Command="{Binding ImportBookCommand}"
+                          IsEnabled="{Binding SelectedLibrary, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <MenuItem Header="_Import Books from Directory..."
+                          Command="{Binding ImportBooksFromDirectoryCommand}"
+                          IsEnabled="{Binding SelectedLibrary, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+            </MenuItem>
+            
+            <MenuItem Header="_View">
+
+                <MenuItem Header="_Icons"
+                          Command="{Binding ChangeViewModeCommand}"
+                          CommandParameter="{x:Static vm:ViewMode.Icons}">
+                    
+                    <MenuItem.Icon>
+                        
+                        <TextBlock FontFamily="{StaticResource MaterialSymbolsFont}"
+                                   Text="{Binding ViewMode, Converter={StaticResource EnumValueToIconConverter}, ConverterParameter={x:Static vm:ViewMode.Icons}}" />
+                        
+                    </MenuItem.Icon>
+                    
+                </MenuItem>
+                
+                <MenuItem Header="_Details"                          
+                          Command="{Binding ChangeViewModeCommand}"
+                          CommandParameter="{x:Static vm:ViewMode.Details}">
+                    
+                    <MenuItem.Icon>
+                        
+                        <TextBlock FontFamily="{StaticResource MaterialSymbolsFont}"
+                                   Text="{Binding ViewMode, Converter={StaticResource EnumValueToIconConverter}, ConverterParameter={x:Static vm:ViewMode.Details}}" />
+                        
+                    </MenuItem.Icon>
+                    
+                </MenuItem>
+                
+            </MenuItem>
+
+
+            <MenuItem Header="_Book">
+
+                <MenuItem Header="_Show in File Manager"
+                          Command="{Binding ShowBookCommand}"
+                          IsEnabled="{Binding SelectedBooks.Count}" />
+
+                <MenuItem Header="_Open in Calibre"
+                          Command="{Binding OpenBookCommand}"
+                          IsEnabled="{Binding SelectedBooks.Count}" />
+
+                <Separator />
+
+                <MenuItem Header="_Edit Books..."
+                          Command="{Binding EditBooksCommand}"
+                          IsEnabled="{Binding SelectedBooks.Count}" />
+
+                <MenuItem Header="_Sync Metadata"
+                          Command="{Binding SyncMetadataCommand}"
+                          IsEnabled="{Binding SelectedBooks.Count}" />
+
+                <Separator />
+
+                <MenuItem Header="_Delete Books"
+                          Command="{Binding DeleteBooksCommand}"
+                          IsEnabled="{Binding SelectedBooks.Count}" />
+
+            </MenuItem>
+
+            <MenuItem Name="PluginsMenuItem" Header="_Plugins">
+
+            </MenuItem>
+
+        </Menu>
+
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Books}"
+                  GridLinesVisibility="All"
+                  BorderThickness="1"
+                  BorderBrush="Gray"
+                  SelectionChanged="OnSelectionChanged"
+                  RowEditEnded="RowEditEnded">
+
+            <DataGrid.IsVisible>
+                
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    
+                    <Binding Path="SelectedLibrary" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                    <Binding Path="ViewMode" Converter="{StaticResource EnumValueToBoolConverter}" ConverterParameter="{x:Static vm:ViewMode.Details}" />
+                    
+                </MultiBinding>
+                
+            </DataGrid.IsVisible>
+            
+            <DataGrid.Columns>
+        
+                <!-- Icon -->
+        
+                <DataGridTextColumn Binding="{Binding Icon}"
+                                    IsReadOnly="True"
+                                    FontFamily="{StaticResource MaterialSymbolsFont}"
+                                    FontSize="20" />
+        
+                <!-- Author -->
+        
+                <DataGridTemplateColumn Header="Author">
+        
+                    <DataGridTemplateColumn.CellTemplate>
+        
+                        <DataTemplate>
+        
+                            <TextBlock Text="{Binding Author}"
+                                       VerticalAlignment="Center"
+                                       Margin="10,0,10,0" />
+        
+                        </DataTemplate>
+        
+                    </DataGridTemplateColumn.CellTemplate>
+        
+                    <DataGridTemplateColumn.CellEditingTemplate>
+        
+                        <DataTemplate>
+        
+                            <AutoCompleteBox Text="{Binding Author}"
+                                             ItemsSource="{Binding #RootView.((vm:MainViewModel)DataContext).Authors}"
+                                             FilterMode="StartsWithOrdinalCaseSensitive" />
+        
+                        </DataTemplate>
+        
+                    </DataGridTemplateColumn.CellEditingTemplate>
+        
+                </DataGridTemplateColumn>
+        
+                <!-- Series -->
+        
+                <DataGridTemplateColumn Header="Series">
+        
+                    <DataGridTemplateColumn.CellTemplate>
+        
+                        <DataTemplate>
+        
+                            <TextBlock Text="{Binding DisplaySeries}"
+                                       VerticalAlignment="Center"
+                                       Margin="10,0,10,0" />
+        
+                        </DataTemplate>
+        
+                    </DataGridTemplateColumn.CellTemplate>
+        
+                    <DataGridTemplateColumn.CellEditingTemplate>
+        
+                        <DataTemplate>
+        
+                            <Grid ColumnDefinitions="*,Auto">
+        
+                                <AutoCompleteBox Text="{Binding Series}"
+                                                 ItemsSource="{Binding #RootView.((vm:MainViewModel)DataContext).Series}"
+                                                 FilterMode="StartsWithOrdinalCaseSensitive" />
+        
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding SeriesNumber}" />
+        
+                            </Grid>
+        
+                        </DataTemplate>
+        
+                    </DataGridTemplateColumn.CellEditingTemplate>
+        
+                </DataGridTemplateColumn>
+        
+                <!-- Title -->
+        
+                <DataGridTextColumn Header="Title"
+                                    Width="*"
+                                    Binding="{Binding Title}"
+                                    IsReadOnly="False" />
+        
+                <!-- Year -->
+        
+                <DataGridTextColumn Header="Year"
+                                    Binding="{Binding Year}"
+                                    IsReadOnly="False" />
+        
+                <!-- Type -->
+        
+                <DataGridTemplateColumn Header="Type"
+                                        SortMemberPath="BookType">
+        
+                    <DataGridTemplateColumn.CellTemplate>
+        
+                        <DataTemplate>
+        
+                            <TextBlock Text="{Binding BookType}"
+                                       VerticalAlignment="Center"
+                                       Margin="10,0,10,0" />
+        
+                        </DataTemplate>
+        
+                    </DataGridTemplateColumn.CellTemplate>
+        
+                    <DataGridTemplateColumn.CellEditingTemplate>
+        
+                        <DataTemplate>
+        
+                            <ComboBox ItemsSource="{Binding Source={x:Static common:Constants.BookTypes}}"
+                                      SelectedItem="{Binding BookType}"
+                                      HorizontalAlignment="Stretch" />
+        
+                        </DataTemplate>
+        
+                    </DataGridTemplateColumn.CellEditingTemplate>
+        
+                </DataGridTemplateColumn>
+        
+                <!-- Added -->
+        
+                <DataGridTextColumn Header="Added"
+                                    Binding="{Binding AddedOn}"
+                                    IsReadOnly="True"
+                                    Width="175" />
+        
+            </DataGrid.Columns>
+        
+            <DataGrid.ContextMenu>
+        
+                <ContextMenu>
+        
+                    <MenuItem Header="_Show in File Manager"
+                              Command="{Binding ShowBookCommand}" />
+        
+                    <MenuItem Header="_Open in Calibre"
+                              Command="{Binding OpenBookCommand}" />
+        
+                    <Separator />
+        
+                    <MenuItem Header="Edit Books..."
+                              Command="{Binding EditBooksCommand}" />
+        
+                    <MenuItem Header="Sync Metadata"
+                              Command="{Binding SyncMetadataCommand}" />
+        
+                    <Separator />
+        
+                    <MenuItem Header="Delete Books"
+                              Command="{Binding DeleteBooksCommand}" />
+        
+                </ContextMenu>
+        
+            </DataGrid.ContextMenu>
+        
+        </DataGrid>
+
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Books}"
+                 SelectionMode="Multiple"
+                 SelectionChanged="OnSelectionChanged">
+            
+            <ListBox.IsVisible>
+                
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    
+                    <Binding Path="SelectedLibrary" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                    <Binding Path="ViewMode" Converter="{StaticResource EnumValueToBoolConverter}" ConverterParameter="{x:Static vm:ViewMode.Icons}" />
+                    
+                </MultiBinding>
+                
+            </ListBox.IsVisible>
+            
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="6" />
+                    <!-- <WrapPanel Orientation="Horizontal" /> -->
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" Margin="10">
+
+                        <Image Source="{Binding Thumbnail}"
+                               Stretch="Uniform"
+                               Margin="0,0,0,10" />
+
+                        <TextBlock Text="{Binding Title}"
+                                   TextWrapping="Wrap"
+                                   HorizontalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxLines="1"
+                                   MaxWidth="200"
+                                   Margin="0,0,0,5" />
+
+                        <TextBlock Text="{Binding Author}"
+                                   TextWrapping="Wrap"
+                                   HorizontalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   FontSize="12"
+                                   Opacity="0.5"
+                                   MaxLines="1"
+                                   MaxWidth="200 " />
+
+                    </StackPanel>
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+            <ListBox.ContextMenu>
+
+                <ContextMenu>
+
+                    <MenuItem Header="_Show in File Manager"
+                              Command="{Binding ShowBookCommand}" />
+
+                    <MenuItem Header="_Open in Calibre"
+                              Command="{Binding OpenBookCommand}" />
+
+                    <Separator />
+
+                    <MenuItem Header="Edit Books..."
+                              Command="{Binding EditBooksCommand}" />
+
+                    <MenuItem Header="Sync Metadata"
+                              Command="{Binding SyncMetadataCommand}" />
+
+                    <Separator />
+
+                    <MenuItem Header="Delete Books"
+                              Command="{Binding DeleteBooksCommand}" />
+
+                </ContextMenu>
+
+            </ListBox.ContextMenu>
+            
+        </ListBox>
+
+    </Grid>
+
+</UserControl>
