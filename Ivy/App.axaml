@@ -1,0 +1,27 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:Ivy.Converters"
+             x:Class="Ivy.App"
+             RequestedThemeVariant="Default">
+
+    <Application.Styles>
+        
+        <FluentTheme />
+
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+        
+        <Style Selector="FlyoutPresenter">
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+    </Application.Styles>
+    
+    <Application.Resources>
+    
+        <FontFamily x:Key="MaterialSymbolsFont">avares://Ivy/Assets/Fonts/MaterialIconsOutlined-Regular.otf#Material Icons Outlined</FontFamily>
+        <converters:EnumValueToBoolConverter x:Key="EnumValueToBoolConverter" />
+        <converters:EnumValueToIconConverter x:Key="EnumValueToIconConverter" />
+
+    </Application.Resources>
+    
+</Application>

@@ -1,0 +1,24 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:Ivy.Views"
+        mc:Ignorable="d" 
+        d:DesignWidth="400"
+        d:DesignHeight="130"
+        SizeToContent="WidthAndHeight"
+        MinWidth="400"
+        MinHeight="100"
+        WindowStartupLocation="CenterOwner"
+        ExtendClientAreaChromeHints="NoChrome"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ShowInTaskbar="False"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        SystemDecorations="BorderOnly"
+        x:Class="Ivy.Views.MessageBoxWindow"
+        Title="Progress">
+
+    <views:MessageBoxView Name="View" />
+
+</Window>

@@ -1,0 +1,288 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ivy.ViewModels"
+             xmlns:common="clr-namespace:Ivy.Common;assembly=Ivy.Common"
+             x:Class="Ivy.Views.EditBookView"
+             x:DataType="vm:EditBookViewModel"
+             d:DesignWidth="1000"
+             d:DesignHeight="700"
+             Name="RootView"
+             Background="Transparent"
+             DragDrop.AllowDrop="True">
+
+    <SplitView IsPaneOpen="True"
+               DisplayMode="Inline"
+               OpenPaneLength="250">
+
+        <SplitView.Pane>
+
+            <ListBox Grid.Column="1"
+                     Name="BookList"
+                     ItemsSource="{Binding Books}"
+                     SelectedItem="{Binding Book}"
+                     Background="{DynamicResource SystemColorWindowColor}">
+
+                <ListBox.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <StackPanel Orientation="Vertical">
+
+                            <TextBlock Text="{Binding Title}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="10,10,10,5" />
+
+                            <TextBlock Text="{Binding Author}"
+                                       FontSize="12"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="10,0,10,10"
+                                       Opacity="0.5" />
+
+                            <Border BorderBrush="{DynamicResource SystemBaseLowColor}"
+                                    BorderThickness="1" />
+
+                        </StackPanel>
+
+                    </DataTemplate>
+
+                </ListBox.ItemTemplate>
+
+                <ListBox.ContextMenu>
+
+                    <ContextMenu>
+
+                        <!-- <MenuItem Header="Search Again" -->
+                        <!--           Command="{Binding RepeatSearchCommand}" /> -->
+
+                    </ContextMenu>
+
+                </ListBox.ContextMenu>
+
+                <ListBox.Styles>
+
+                    <Style Selector="ListBoxItem">
+
+                        <Setter Property="Margin"
+                                Value="0,0,0,0" />
+
+                        <Setter Property="Padding"
+                                Value="0,0,0,0" />
+                    </Style>
+
+                </ListBox.Styles>
+
+            </ListBox>
+
+        </SplitView.Pane>
+
+        <Grid RowDefinitions="*,Auto"
+              ColumnDefinitions="*,240"
+              Margin="10">
+
+            <DockPanel LastChildFill="True"
+                       Grid.Column="0">
+
+                <StackPanel Orientation="Vertical"
+                            VerticalAlignment="Stretch"
+                            DockPanel.Dock="Top">
+
+                    <Grid RowDefinitions="Auto,Auto"
+                          ColumnDefinitions="*,Auto"
+                          Margin="0,0,0,10">
+
+                        <TextBlock Grid.Row="0"
+                                   Margin="0,0,0,5"
+                                   Text="Title"
+                                   FontWeight="Bold"
+                                   FontSize="12" />
+
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="0"
+                                 Text="{Binding Book.Title}" />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Margin="10,0,0,5"
+                                   Text="Type"
+                                   FontWeight="Bold"
+                                   FontSize="12" />
+
+                        <ComboBox Grid.Row="1"
+                                  Grid.Column="1"
+                                  Margin="10,0,0,0"
+                                  Width="150"
+                                  ItemsSource="{Binding Source={x:Static common:Constants.BookTypes}}"
+                                  SelectedItem="{Binding Book.BookType}" />
+
+                    </Grid>
+
+                    <Grid RowDefinitions="Auto,Auto"
+                          ColumnDefinitions="*,Auto"
+                          Margin="0,0,0,10">
+
+                        <TextBlock Grid.Row="0"
+                                   Margin="0,0,0,5"
+                                   Text="Author"
+                                   FontWeight="Bold"
+                                   FontSize="12" />
+
+                        <AutoCompleteBox Grid.Row="1"
+                                         Grid.Column="0"
+                                         Text="{Binding Book.Author}"
+                                         ItemsSource="{Binding !!#RootView.((vm:EditBookViewModel)DataContext).Authors}"
+                                         FilterMode="StartsWithOrdinalCaseSensitive" />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Margin="10,0,0,5"
+                                   Text="Year"
+                                   FontWeight="Bold"
+                                   FontSize="12" />
+
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Margin="10,0,0,0"
+                                 Width="70"
+                                 Text="{Binding Book.Year}" />
+
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto,Auto"
+                          RowDefinitions="Auto,Auto"
+                          Margin="0,0,0,10">
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Margin="0,0,0,5"
+                                   Text="Series"
+                                   FontWeight="Bold"
+                                   FontSize="12" />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Margin="10,0,0,5"
+                                   Text="Series No."
+                                   FontWeight="Bold"
+                                   FontSize="12" />
+
+
+                        <AutoCompleteBox Grid.Row="1"
+                                         Grid.Column="0"
+                                         Text="{Binding Book.Series}"
+                                         ItemsSource="{Binding #RootView.((vm:EditBookViewModel)DataContext).Series}"
+                                         FilterMode="StartsWithOrdinalCaseSensitive" />
+
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Margin="10,0,0,0"
+                                 Width="70"
+                                 Text="{Binding Book.SeriesNumber}" />
+
+                    </Grid>
+
+                    <TextBlock Margin="0,0,0,5"
+                               Text="Description"
+                               FontWeight="Bold"
+                               FontSize="12" />
+
+                </StackPanel>
+
+                <TextBox Text="{Binding Book.Description}"
+                         TextWrapping="Wrap" />
+
+            </DockPanel>
+
+            <StackPanel Orientation="Vertical"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="10,0,0,10">
+
+                <TextBlock Text="Cover"
+                           FontWeight="Bold"
+                           FontSize="12"
+                           Margin="0,0,0,5" />
+
+
+                <Grid ColumnDefinitions="*,Auto">
+
+                    <Button Content="Browse..."
+                            Command="{Binding BrowseForCoverCommand}"
+                            Margin="0,0,0,5" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+
+                        <Button Content="Bing"
+                                Command="{Binding SearchBingForCoverCommand}"
+                                Margin="0,0,0,5"
+                                HorizontalAlignment="Right" />
+
+                        <Button Content="Google"
+                                Command="{Binding SearchGoogleForCoverCommand}"
+                                Margin="5,0,0,5"
+                                HorizontalAlignment="Right" />
+
+                    </StackPanel>
+
+                </Grid>
+
+                <Image Source="{Binding Book.Cover}" />
+
+            </StackPanel>
+
+            <StackPanel Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2">
+                
+                <TextBlock Text="Search"
+                           FontWeight="Bold"
+                           FontSize="12"
+                           Margin="0,20,0,5" />
+                
+                <StackPanel Orientation="Horizontal">
+
+                    <Button Content="Search"
+                            Margin="0,0,5,5"
+                            Command="{Binding SearchCommand}" />
+
+                    <Button Content="Auto"
+                            Margin="0,0,0,5"
+                            Command="{Binding AutoMetadataCommand}" 
+                            IsEnabled="{Binding SearchResults.Count}"/>
+                    
+                </StackPanel>
+                
+                <DataGrid Name="SearchResultGrid"
+                            Height="350"
+                            ItemsSource="{Binding SearchResults}"
+                            DoubleTapped="SearchResult_OnDoubleTapped">
+
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="Author"
+                                            Binding="{Binding TruncatedAuthor}"
+                                            FontSize="12" />
+
+                        <DataGridTextColumn Header="Title"
+                                            Binding="{Binding TruncatedTitle}"
+                                            FontSize="12" />
+
+                        <DataGridTextColumn Header="Year"
+                                            Binding="{Binding Year}" 
+                                            FontSize="12" />
+
+                        <DataGridTextColumn Header="Description"
+                                            Binding="{Binding Description}" 
+                                            FontSize="12" />
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+                
+            </StackPanel>
+
+        </Grid>
+
+    </SplitView>
+
+</UserControl>

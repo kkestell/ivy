@@ -1,0 +1,46 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Ivy.ViewModels"
+             x:Class="Ivy.Views.NewLibraryView"
+             x:DataType="vm:NewLibraryViewModel"
+             d:DesignWidth="400">
+
+    <Grid RowDefinitions="*,Auto"
+          Margin="10">
+        
+        <StackPanel Orientation="Vertical"
+                    Margin="0,0,0,10">
+        
+            <TextBlock Text="Name"
+                       Margin="0,0,0,5"/>
+        
+            <TextBox Text="{Binding Library.Name, Mode=TwoWay}"
+                     Margin="0,0,0,10" />
+        
+            <TextBlock Text="Path"
+                       Margin="0,0,0,5"/>
+        
+            <Grid ColumnDefinitions="*,Auto">
+        
+                <TextBox Text="{Binding Library.Path, Mode=TwoWay}"
+                         Margin="0,0,0,10" />
+        
+                <Button Grid.Column="1"
+                        Content="Browse..."
+                        Command="{Binding BrowseCommand}"
+                        Margin="5,0,0,10"
+                        VerticalAlignment="Top"/>
+        
+            </Grid>
+        
+        </StackPanel>
+        
+        <Button Grid.Row="1"
+                Command="{Binding CreateLibraryCommand}"
+                Content="Create Library"
+                HorizontalAlignment="Center" />
+        
+    </Grid>
+    
+</UserControl>

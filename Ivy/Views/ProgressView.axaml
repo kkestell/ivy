@@ -1,0 +1,21 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Ivy.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignWidth="400" 
+             d:DesignHeight="150"
+             x:Class="Ivy.Views.ProgressView"
+             x:DataType="viewModels:ProgressViewModel">
+    
+    <StackPanel Orientation="Vertical" Margin="20">
+        <TextBlock Margin="0,0,0,5" Text="{Binding ProgressTitle}" TextTrimming="CharacterEllipsis" FontWeight="Bold" />
+        <TextBlock Margin="0,0,0,5" Text="{Binding ProgressText}" TextTrimming="CharacterEllipsis" FontSize="12" />
+        <Grid Margin="0,10,0,0" ColumnDefinitions="*,Auto">
+            <ProgressBar Grid.Column="0" Margin="0,0,20,0" Height="10" VerticalAlignment="Center" Value="{Binding ProgressValue}" Maximum="100" />
+            <Button Grid.Column="1" Content="Stop" Command="{Binding CancelCommand}" IsEnabled="{Binding IsCancelEnabled}" HorizontalAlignment="Center" />
+        </Grid>
+    </StackPanel>
+    
+</UserControl>

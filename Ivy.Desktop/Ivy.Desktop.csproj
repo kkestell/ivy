@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
+    One for Windows with net7.0-windows TFM, one for MacOS with net7.0-macos and one with net7.0 TFM for Linux.-->
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishAot>False</PublishAot>
+    <UseWPF>False</UseWPF>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AssemblyName></AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.6" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ivy.Plugins.CoverGenerator\Ivy.Plugins.CoverGenerator.csproj" />
+    <ProjectReference Include="..\Ivy.Plugins.Downloader\Ivy.Plugins.Downloader.csproj" />
+    <ProjectReference Include="..\Ivy.Plugins.Metadata.GoogleBooks\Ivy.Plugins.Metadata.GoogleBooks.csproj" />
+    <ProjectReference Include="..\Ivy.Plugins.Metadata.OpenLibrary\Ivy.Plugins.Metadata.OpenLibrary.csproj" />
+    <ProjectReference Include="..\Ivy\Ivy.csproj" />
+  </ItemGroup>
+</Project>

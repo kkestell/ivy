@@ -1,0 +1,17 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Ivy.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignWidth="400" 
+             d:DesignHeight="130"
+             x:Class="Ivy.Views.MessageBoxView"
+             x:DataType="viewModels:MessageBoxViewModel">
+    
+    <StackPanel Orientation="Vertical" Margin="20">
+        <TextBlock Margin="0,0,0,20" Text="{Binding Message}" TextWrapping="Wrap" FontSize="12" />
+        <Button Content="Ok" Command="{Binding OkCommand}" HorizontalAlignment="Center" />
+    </StackPanel>
+    
+</UserControl>
