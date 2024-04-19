@@ -10,6 +10,7 @@ using Ivy.Plugins.Abstract;
 using Ivy.Services;
 using Ivy.Services.Libraries;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Ivy.ViewModels;
 
@@ -177,7 +178,7 @@ public partial class EditBookViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine("An error occurred: " + ex.Message);
+            Log.Error(ex, "Error opening web browser");
         }
     }
 }

@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using Ivy.Common;
 using Ivy.Plugins.Abstract;
+using Serilog;
 
 namespace Ivy.Plugins.Downloader.ViewModels;
 
@@ -176,14 +177,24 @@ public partial class DownloaderViewModel : ObservableObject
                         continue;
                     }
 
-                    await Dispatcher.UIThread.InvokeAsync(() => _host.ImportBook(new FileInfo(localPath)));
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        try
+                        {
+                            _host.ImportBook(new FileInfo(localPath));
+                        }
+                        catch(Exception ex)
+                        {
+                            _host.MessageBox(ex.Message);
+                        }
+                    });
 
                     downloadJob.Status = DownloadStatus.Done;
                 }
                 catch (Exception e)
                 {
                     downloadJob.Status = DownloadStatus.Error;
-                    Console.WriteLine(e);
+                    Log.Error(e, "Error downloading book");
                 }
             }
             else

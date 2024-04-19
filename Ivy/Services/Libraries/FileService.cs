@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using Ivy.Common.Models;
+using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
@@ -66,9 +67,9 @@ public class FileService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-
             book.HasCover = false;
+            
+            Log.Error(e, "Error adding cover");
         }
     }
 

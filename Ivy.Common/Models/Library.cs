@@ -13,9 +13,6 @@ public class Library
     [JsonIgnore]
     public List<Book> Books { get; set; } = new();
     
-    [JsonIgnore]
-    public List<Book> SelectedBooks { get; set; } = new();
-
     public bool ContainsBook(Book book)
     {
         return Books.Any(x =>

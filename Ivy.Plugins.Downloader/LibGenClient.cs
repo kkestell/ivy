@@ -1,4 +1,6 @@
-﻿using AngleSharp.Html.Parser;
+﻿using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+using AngleSharp.Html.Parser;
 using Ivy.Common;
 using Ivy.Plugins.Downloader.ViewModels;
 
@@ -11,7 +13,10 @@ public class LibGenClient
     
     public LibGenClient()
     {
-        _client = new HttpClient();
+        var handler = new HttpClientHandler();
+        handler.ServerCertificateCustomValidationCallback = (HttpRequestMessage requestMessage, X509Certificate2 certificate, X509Chain chain, SslPolicyErrors sslErrors) => true;
+        _client = new HttpClient(handler);
+        
         _parser = new HtmlParser();
     }
     
@@ -33,7 +38,6 @@ public class LibGenClient
                 break;
             
             var url = $"https://libgen.is/fiction/?q={query}&language=English&format={format}&page={currentPage}";
-            Console.WriteLine($"Visiting {url}...");
             var response = await _client.GetAsync(url);
             var content = await response.Content.ReadAsStringAsync();
 
@@ -157,7 +161,6 @@ public class LibGenClient
     {
         try
         {
-            Console.WriteLine($"Downloading {downloadUrl}");
             var response = await _client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
             var totalBytes = response.Content.Headers.ContentLength ?? 0;
             var bytesDownloaded = 0L;
@@ -171,7 +174,6 @@ public class LibGenClient
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        Console.WriteLine($"Download canceled for {fileName}");
                         return null;
                     }
                     
@@ -182,12 +184,10 @@ public class LibGenClient
                 }
             }
 
-            Console.WriteLine($"Successfully downloaded {fileName}");
             return fileName;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error downloading {downloadUrl}: {ex.Message}");
             return null;
         }
     }

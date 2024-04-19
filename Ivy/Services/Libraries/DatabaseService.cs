@@ -107,9 +107,19 @@ public class DatabaseService : IDisposable
     /// <param name="book">The book with updated information.</param>
     public void UpdateBook(Book book)
     {
-        _db.Execute(
-            "UPDATE Books SET Title = @Title, Author = @Author, BookType = @BookType, Series = @Series, SeriesNumber = @SeriesNumber, Year = @Year, Description = @Description, EpubPath = @EpubPath, HasCover = @HasCover WHERE Id = @Id",
-            book);
+        _db.Execute("""
+            UPDATE Books
+               SET Title = @Title,
+                   Author = @Author,
+                   BookType = @BookType,
+                   Series = @Series,
+                   SeriesNumber = @SeriesNumber,
+                   Year = @Year,
+                   Description = @Description,
+                   EpubPath = @EpubPath,
+                   HasCover = @HasCover
+             WHERE Id = @Id
+        """, book);
     }
 
     /// <summary>
@@ -118,35 +128,37 @@ public class DatabaseService : IDisposable
     /// <param name="book">The book to be deleted.</param>
     public void DeleteBook(Book book)
     {
-        _db.Execute("DELETE FROM Books WHERE Id = @Id", book);
+        _db.Execute("""
+            DELETE FROM Books WHERE Id = @Id
+        """, book);
     }
     
-    // /// <summary>
-    // /// Checks if a book with the same title, author, series, and series number exists in the database.
-    // /// </summary>
-    // /// <param name="book">The book to check for existence.</param>
-    // /// <returns>True if the book exists; otherwise, false.</returns>
-    // public bool ContainsBook(Book book)
-    // {
-    //     var query = @"
-    //         SELECT COUNT(*) 
-    //         FROM Books 
-    //         WHERE 
-    //             Title = @Title 
-    //             AND Author = @Author 
-    //             AND Series = @Series 
-    //             AND SeriesNumber = @SeriesNumber";
-    //
-    //     int count = _db.ExecuteScalar<int>(query, new 
-    //     { 
-    //         book.Title, 
-    //         book.Author, 
-    //         book.Series, 
-    //         book.SeriesNumber 
-    //     });
-    //
-    //     return count > 0;
-    // }
+    /// <summary>
+    /// Checks if a book with the same title, author, series, and series number exists in the database.
+    /// </summary>
+    /// <param name="book">The book to check for existence.</param>
+    /// <returns>True if the book exists; otherwise, false.</returns>
+    public bool ContainsBook(Book book)
+    {
+        var query = """
+            SELECT COUNT(*) 
+              FROM Books 
+             WHERE Title = @Title 
+               AND Author = @Author 
+               AND Series = @Series 
+               AND SeriesNumber = @SeriesNumber
+        """;
+    
+        var count = _db.ExecuteScalar<int>(query, new 
+        { 
+            book.Title, 
+            book.Author, 
+            book.Series, 
+            book.SeriesNumber 
+        });
+    
+        return count > 0;
+    }
 
     /// <summary>
     /// Disposes the database connection.

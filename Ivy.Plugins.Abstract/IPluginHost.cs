@@ -11,4 +11,6 @@ public interface IPluginHost
     void AddMenuItem(string pluginName, string menuItemName, Func<Task> action);
     
     void ImportBook(FileInfo epubFileInfo);
+
+    void MessageBox(string message);
 }

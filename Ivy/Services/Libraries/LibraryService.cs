@@ -1,20 +1,22 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.InteropServices;
+using System.Text.Json;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Ivy.Common;
 using Ivy.Common.Models;
+using Serilog;
 
 namespace Ivy.Services.Libraries;
 
 public class LibraryService : IDisposable
 {
-    private const string StateFilePath = "libraryState.json";
-
     private readonly List<LibraryServiceCollection> _libraries = [];
 
-    private LibraryServiceCollection? _selectedLibrary;
-
     private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
+
+    private LibraryServiceCollection? _selectedLibrary;
+    
+    private static string StateFilePath => LibraryStatePath();
     
     /// <summary>
     /// 
@@ -112,7 +114,7 @@ public class LibraryService : IDisposable
         if (_selectedLibrary is null)
             throw new InvalidOperationException("No library selected");
 
-        var epub = new Epub(epubFileInfo.FullName);
+        using var epub = Epub.Load(epubFileInfo);
 
         var title = epub.Title?.Trim();
         if (string.IsNullOrEmpty(title))
@@ -140,7 +142,7 @@ public class LibraryService : IDisposable
             EpubPath = epubFileInfo.FullName,
             Description = description
         };
-
+        
         var idx = 1;
         while (_selectedLibrary.Library.ContainsBook(book))
         {
@@ -206,7 +208,7 @@ public class LibraryService : IDisposable
     /// <param name="book"></param>
     public static void SyncMetadata(Book book)
     {
-        var epub = new Epub(book.EpubPath);
+        using var epub = Epub.Load(new FileInfo(book.EpubPath));
         
         epub.Title = book.Title;
         epub.Creators = [new Creator { Name = book.Author, FileAs = Epub.AuthorNameToFileAs(book.Author), Role = Role.Author }];
@@ -218,7 +220,7 @@ public class LibraryService : IDisposable
         
         epub.Save();
     }
-    
+
     private void SaveState()
     {
         var state = new LibraryServiceState
@@ -226,6 +228,10 @@ public class LibraryService : IDisposable
             Libraries = Libraries.ToList(),
             SelectedLibraryId = SelectedLibrary?.Id
         };
+        
+        var folderPath = Path.GetDirectoryName(StateFilePath)!;
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
 
         var json = JsonSerializer.Serialize(state, _jsonOptions);
         File.WriteAllText(StateFilePath, json);
@@ -233,6 +239,8 @@ public class LibraryService : IDisposable
 
     private void LoadState()
     {
+        Log.Information($"Loading library state from {StateFilePath}");
+        
         if (!File.Exists(StateFilePath))
             return;
 
@@ -254,8 +262,32 @@ public class LibraryService : IDisposable
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error(e, "Error loading library state");
         }
+    }
+    
+    private static string LibraryStatePath()
+    {
+        string folderPath;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            folderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support");
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var xdgStateHome = Environment.GetEnvironmentVariable("XDG_STATE_HOME");
+            folderPath = !string.IsNullOrEmpty(xdgStateHome) ? xdgStateHome : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "state");
+        }
+        else
+        {
+            throw new PlatformNotSupportedException();
+        }
+        
+        return Path.Combine(folderPath, "ivy", "libraries.json");
     }
 
     public void Dispose()

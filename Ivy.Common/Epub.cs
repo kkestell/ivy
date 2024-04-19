@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Xml.Linq;
 using Avalonia.Media.Imaging;
+using Serilog;
 
 namespace Ivy.Common;
 
@@ -9,20 +10,19 @@ public class Epub : IDisposable
     private readonly FileInfo _filePath;
     private readonly FileInfo _opfFilePath;
     private readonly DirectoryInfo _tempDir;
-
-    public Epub(string filePath)
+    
+    public static Epub Load(FileInfo filePath)
     {
-        _filePath = new FileInfo(filePath);
-        _tempDir = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
-        _tempDir.Create();
+        var tempDir = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
+        tempDir.Create();
 
-        using (var epubStream = new FileStream(_filePath.FullName, FileMode.Open, FileAccess.Read))
+        using (var epubStream = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read))
         {
             using (var archive = new ZipArchive(epubStream, ZipArchiveMode.Read))
             {
                 foreach (var entry in archive.Entries)
                 {
-                    var fullPath = Path.Combine(_tempDir.FullName, entry.FullName);
+                    var fullPath = Path.Combine(tempDir.FullName, entry.FullName);
                     var directoryPath = Path.GetDirectoryName(fullPath)!;
 
                     if (!Directory.Exists(directoryPath))
@@ -36,7 +36,7 @@ public class Epub : IDisposable
             }
         }
 
-        var containerFilePath = Path.Combine(_tempDir.FullName, "META-INF/container.xml");
+        var containerFilePath = Path.Combine(tempDir.FullName, "META-INF/container.xml");
         var containerFileInfo = new FileInfo(containerFilePath);
 
         using var containerFileReader = new StreamReader(containerFileInfo.OpenRead());
@@ -52,12 +52,26 @@ public class Epub : IDisposable
         if (string.IsNullOrEmpty(relativePath))
             throw new Exception("OPF path not found in container file.");
 
-        _opfFilePath = new FileInfo(Path.Combine(_tempDir.FullName, relativePath) ??
+        var opfFilePath = new FileInfo(Path.Combine(tempDir.FullName, relativePath) ??
                                     throw new Exception("OPF path not found in container file."));
 
-        if (!_opfFilePath.Exists)
+        if (!opfFilePath.Exists)
             throw new Exception("OPF file not found in EPUB.");
+        
+        return new Epub(filePath, opfFilePath, tempDir);
+    }
 
+    private Epub(FileInfo filePath, FileInfo opfFilePath, DirectoryInfo tempDirectory)
+    {
+        _filePath = filePath;
+        _opfFilePath = opfFilePath;
+        _tempDir = tempDirectory;
+
+        Refresh();
+    }
+
+    public void Refresh()
+    {
         using var opfFileReader = new StreamReader(_opfFilePath.OpenRead());
         var opfDoc = XDocument.Parse(opfFileReader.ReadToEnd());
 
@@ -124,8 +138,7 @@ public class Epub : IDisposable
             {
                 CoverFileInfo = null;
                 CoverImage = null;
-                
-                Console.WriteLine(e);
+                Log.Error(e, "Error loading cover image.");
             }
         }
     }

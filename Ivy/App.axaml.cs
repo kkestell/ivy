@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -10,6 +11,7 @@ using Ivy.ViewModels;
 using Ivy.Views;
 
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Ivy;
 
@@ -32,8 +34,38 @@ public class App : Application
         AvaloniaXamlLoader.Load(this);
     }
     
+    private static string LogFilePath()
+    {
+        string folderPath;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            folderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Logs");
+        }
+        else
+        {
+            var xdgCacheHome = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
+            folderPath = !string.IsNullOrEmpty(xdgCacheHome) ? xdgCacheHome : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache");
+        }
+
+        return Path.Combine(folderPath, "ivy", "ivy.log");
+    }
+
     public static void ConfigureServices(IServiceCollection serviceCollection)
     {
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .WriteTo.File(LogFilePath(), rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+        
+        Log.Information("Starting Ivy");
+        
+        serviceCollection.AddLogging(loggingBuilder =>
+            loggingBuilder.AddSerilog(dispose: true));
+        
         serviceCollection.AddTransient<MainViewModel>(provider =>
         {
             var windowService = provider.GetRequiredService<WindowService>();
@@ -98,14 +130,9 @@ public class App : Application
     
     private void LoadPlugins()
     {
-        const string pluginDirectory = ".";
-
         var pluginHost = _serviceProvider.GetRequiredService<IPluginHost>();
-
-        if (!Directory.Exists(pluginDirectory))
-            return;
         
-        foreach (var file in Directory.GetFiles(pluginDirectory, "*.dll"))
+        foreach (var file in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll"))
         {
             var assembly = Assembly.LoadFrom(file);
             foreach (var type in assembly.GetTypes())
@@ -117,6 +144,8 @@ public class App : Application
 
                     if (Activator.CreateInstance(type) is not IPlugin plugin)
                         continue;
+                    
+                    Log.Information($"Loading plugin {type.FullName}");
 
                     plugin.Initialize(pluginHost, _serviceCollection);
                     
@@ -125,7 +154,7 @@ public class App : Application
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Log.Error(e, $"Error loading plugin {type.FullName}");
                 }
             }
         }

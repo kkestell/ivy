@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenAI_API;
 using OpenAI_API.Images;
 using OpenAI_API.Models;
+using Serilog;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -95,14 +96,12 @@ public class Plugin : IPlugin
             
             image.Mutate(x => x.DrawText(firstSelectedBook.Title, titleFont, Color.White, new PointF(10, 10)));
             image.Mutate(x => x.DrawText(firstSelectedBook.Author, authorFont, Color.White, new PointF(10, image.Height - authorFont.Size - 10)));
-            
-            // save image to C:\Users\Kyle\Desktop\test.jpg
-            
-            image.Save($@"C:\Users\Kyle\Desktop\{firstSelectedBook.Title}.jpg");
+                       
+            image.Save($"{firstSelectedBook.Title}.jpg");
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error(e, "Error generating cover");
         }
     }
 }

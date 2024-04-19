@@ -38,4 +38,9 @@ public class PluginHost(WindowService windowService, LibraryService libraryServi
     {
         libraryService.ImportBook(epubFileInfo);
     }
+
+    public void MessageBox(string message)
+    {
+        windowService.ShowMessageBox(message);
+    }
 }

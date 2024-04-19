@@ -276,6 +276,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 {
                     Debug.WriteLine($"Epub file {file.FullName} contains invalid XML: {e.Message}");
                 }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"Failed to import book {file.FullName}: {e.Message}");
+                }
 
                 progress++;
                 percentComplete = (double)progress / total * 100;
